@@ -1,0 +1,13 @@
+version: "3.3"
+services:
+  jenkins-build:
+    build: .
+    container_name: "jenkins-build"
+    image: jenkins-build
+    environment:
+      - DOCKER_HUB_USERNAME=${DOCKER_HUB_USERNAME}
+      - DOCKER_HUB_PASSWORD=${DOCKER_HUB_PASSWORD}
+      - DOCKER_HUB_EMAIL=${DOCKER_HUB_EMAIL}
+    volumes:
+      - ./:/project
+      - /var/run/docker.sock:/var/run/docker.sock

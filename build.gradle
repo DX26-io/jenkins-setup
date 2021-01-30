@@ -1,0 +1,25 @@
+buildscript {
+	repositories { jcenter() }
+
+	dependencies {
+		classpath "com.github.jruby-gradle:jruby-gradle-plugin:${jrubyVersion}"
+		classpath "org.asciidoctor:asciidoctor-gradle-plugin:${asciidoctorGradleVersion}"
+		classpath "com.bmuschko:gradle-docker-plugin:${gradleDockerPluginVersion}"
+	}
+}
+
+plugins {
+	id 'java'
+}
+
+
+repositories {
+	jcenter()
+}
+
+allprojects {
+	version = project.findProperty("newVersion") ?: project.findProperty("defaultVersion")
+}
+
+apply from: 'gradle/docs.gradle'
+apply from: 'gradle/custom.gradle'

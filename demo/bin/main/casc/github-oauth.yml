@@ -1,0 +1,20 @@
+jenkins:
+    securityRealm:
+      github:
+        githubWebUri: "https://github.com"
+        githubApiUri: "https://api.github.com"
+        clientID: "${OAUTH_CLIENT_ID}"
+        clientSecret: "${OAUTH_CLIENT_SECRET}"
+        oauthScopes: "read:org,user:email,repo"
+    authorizationStrategy:
+      github:
+        adminUserNames: "admin-vizcentric, Cobrijani"
+        organizationNames: "viz-centric"
+        useRepositoryPermissions: true
+        authenticatedUserReadPermission: false
+        authenticatedUserCreateJobPermission: false
+        allowGithubWebHookPermission: true
+        allowCcTrayPermission: false
+        allowAnonymousReadPermission: false
+        allowAnonymousJobStatusPermission: false
+

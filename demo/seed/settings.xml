@@ -1,0 +1,82 @@
+<settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+		  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0
+                      https://maven.apache.org/xsd/settings-1.0.0.xsd">
+
+	<servers>
+		<server>
+			<id>dev-azure-com-vizcentric-flair-commons</id>
+			<username>flair-commons</username>
+			<!-- Treat this auth token like a password. Do not share it with anyone, including Microsoft support. -->
+			<!-- The generated token expires on or before 24/11/2019 -->
+			<password>${FLAIR_COMMONS_ARTIFACTORY}</password>
+		</server>
+
+		<server>
+			<id>dev-azure-com-vizcentric-flair-protobuf-messages</id>
+			<username>flair-protobuf-messages</username>
+			<!-- Treat this auth token like a password. Do not share it with anyone, including Microsoft support. -->
+			<!-- The generated token expires on or before 24/11/2019 -->
+			<password>${FLAIR_PROTOBUF_ARTIFACTORY}</password>
+		</server>
+
+		<server>
+			<id>dev-azure-com-vizcentric-flair-query-language</id>
+			<username>flair-query-language</username>
+			<!-- Treat this auth token like a password. Do not share it with anyone, including Microsoft support. -->
+			<!-- The generated token expires on or before 24/11/2019 -->
+			<password>${FLAIR_QUERY_ARTIFACTORY}</password>
+		</server>
+
+		<server>
+			<id>dev-azure-com-vizcentric-flair-registry</id>
+			<username>flair-registry</username>
+			<!-- Treat this auth token like a password. Do not share it with anyone, including Microsoft support. -->
+			<!-- The generated token expires on or before 24/11/2019 -->
+			<password>${FLAIR_REGISTRY_ARTIFACTORY}</password>
+		</server>
+
+		<server>
+			<id>dev-azure-com-vizcentric-flair-bi</id>
+			<username>flair-bi</username>
+			<!-- Treat this auth token like a password. Do not share it with anyone, including Microsoft support. -->
+			<!-- The generated token expires on or before 24/11/2019 -->
+			<password>${FLAIR_BI_ARTIFACTORY}</password>
+		</server>
+
+		<server>
+			<id>dev-azure-com-vizcentric-flair-engine</id>
+			<username>flair-engine</username>
+			<!-- Treat this auth token like a password. Do not share it with anyone, including Microsoft support. -->
+			<!-- The generated token expires on or before 24/11/2019 -->
+			<password>${FLAIR_ENGINE_ARTIFACTORY}</password>
+		</server>
+
+		<server>
+			<id>dev-azure-com-vizcentric-flair-cache</id>
+			<username>flair-cache</username>
+			<!-- Treat this auth token like a password. Do not share it with anyone, including Microsoft support. -->
+			<!-- The generated token expires on or before 24/11/2019 -->
+			<password>${FLAIR_CACHE_ARTIFACTORY}</password>
+		</server>
+
+		<server>
+			<id>dev-azure-com-vizcentric-oracle-driver</id>
+			<username>oracle-driver</username>
+			<!-- Treat this auth token like a password. Do not share it with anyone, including Microsoft support. -->
+			<!-- The generated token expires on or before 24/11/2019 -->
+			<password>${ORACLE_DRIVER_ARTIFACTORY}</password>
+		</server>
+
+		<server>
+			<id>docker.io</id>
+			<username>${DOCKER_REGISTRY_USERNAME}</username>
+			<password>${DOCKER_REGISTRY_PASSWORD}</password>
+		</server>
+
+		<server>
+			<id>github-credentials</id>
+			<username>${GIT_USERNAME}</username>
+			<password>${GIT_PASSWORD}</password>
+		</server>
+	</servers>
+</settings>

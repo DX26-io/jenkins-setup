@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge"><![endif]-->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 1.5.8">
+<title>Untitled</title>
+<link rel="stylesheet" href="css/spring.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+</head>
+<body class="article">
+<div id="header">
+</div>
+<div id="content">
+<div class="paragraph">
+<p>We created the seed job for you, but you have to run it. When you do
+run it, you have to provide some properties. By default we create a seed that
+has all the properties options, but you can delete most of it. If you
+set the properties as global environment variables, you have to remove them from the
+seed.</p>
+</div>
+<div class="paragraph">
+<p>To run the demo, provide a comma-separated
+list of the URLs of the two aforementioned forks (<code>github-webhook</code> and <code>github-analytics') in the `REPOS</code> variable.</p>
+</div>
+<div class="paragraph">
+<p>The following images shows the steps involved:</p>
+</div>
+<div class="paragraph">
+<p>&#160;
+&#160;</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="https://raw.githubusercontent.com/CloudPipelines/jenkins/master/docs/images/jenkins/seed_click.png" alt="seed click">
+</div>
+<div class="title">Step 1: Click the 'jenkins-pipeline-seed-cf' job for Cloud Foundry and <code>jenkins-pipeline-seed-k8s</code> for Kubernetes</div>
+</div>
+<div class="paragraph">
+<p>&#160;
+&#160;</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="https://raw.githubusercontent.com/CloudPipelines/jenkins/master/docs/images/jenkins/seed_run.png" alt="seed run">
+</div>
+<div class="title">Step 2: Click the 'Build with parameters'</div>
+</div>
+<div class="paragraph">
+<p>&#160;
+&#160;</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="https://raw.githubusercontent.com/CloudPipelines/jenkins/master/docs/images/jenkins/seed.png" alt="seed">
+</div>
+<div class="title">Step 3: The <code>REPOS</code> parameter should already contain your forked repos (you&#8217;ll have more properties than the ones in the screenshot)</div>
+</div>
+<div class="paragraph">
+<p>&#160;
+&#160;</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="https://raw.githubusercontent.com/CloudPipelines/jenkins/master/docs/images/jenkins/seed_built.png" alt="seed built">
+</div>
+<div class="title">Step 4: This is how the results of seed should look like</div>
+</div>
+</div>
+<link rel="stylesheet" href="js/highlight/styles/atom-one-dark-reasonable.min.css">
+<script src="js/highlight/highlight.min.js"></script>
+<script>hljs.initHighlighting()</script>
+</body>
+</html>

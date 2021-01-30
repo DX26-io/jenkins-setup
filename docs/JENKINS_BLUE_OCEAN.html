@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge"><![endif]-->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 1.5.8">
+<title>Untitled</title>
+<link rel="stylesheet" href="css/spring.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+</head>
+<body class="article">
+<div id="header">
+</div>
+<div id="content">
+<div class="paragraph">
+<p>You can also use the <a href="https://jenkins.io/doc/book/pipeline/syntax/">declarative pipeline</a> approach with the
+<a href="https://jenkins.io/projects/blueocean/">Blue Ocean UI</a>.</p>
+</div>
+<div class="paragraph">
+<p>The Blue Ocean UI is available under the <code>blue/</code> URL (for example, for Docker Machine-based setup: <code><a href="https://192.168.99.100:8080/blue" class="bare">https://192.168.99.100:8080/blue</a></code>).</p>
+</div>
+<div class="paragraph">
+<p>The following images show the various steps involved:</p>
+</div>
+<div class="paragraph">
+<p>&#160;
+&#160;</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="https://raw.githubusercontent.com/CloudPipelines/jenkins/master/docs/images/jenkins/blue_1.png" alt="blue 1">
+</div>
+<div class="title">Step 1: Open Blue Ocean UI and click on <code>github-webhook-declarative-pipeline</code></div>
+</div>
+<div class="paragraph">
+<p>&#160;
+&#160;</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="https://raw.githubusercontent.com/CloudPipelines/jenkins/master/docs/images/jenkins/blue_2.png" alt="blue 2">
+</div>
+<div class="title">Step 2: Your first run will look like this. Click <code>Run</code> button</div>
+</div>
+<div class="paragraph">
+<p>&#160;
+&#160;</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="https://raw.githubusercontent.com/CloudPipelines/jenkins/master/docs/images/jenkins/blue_3.png" alt="blue 3">
+</div>
+<div class="title">Step 3: Enter parameters required for the build and click <code>run</code></div>
+</div>
+<div class="paragraph">
+<p>&#160;
+&#160;</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="https://raw.githubusercontent.com/CloudPipelines/jenkins/master/docs/images/jenkins/blue_4.png" alt="blue 4">
+</div>
+<div class="title">Step 4: A list of pipelines will be shown. Click your first run.</div>
+</div>
+<div class="paragraph">
+<p>&#160;
+&#160;</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="https://raw.githubusercontent.com/CloudPipelines/jenkins/master/docs/images/jenkins/blue_5.png" alt="blue 5">
+</div>
+<div class="title">Step 5: State if you want to go to production or not and click <code>Proceed</code></div>
+</div>
+<div class="paragraph">
+<p>&#160;
+&#160;</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="https://raw.githubusercontent.com/CloudPipelines/jenkins/master/docs/images/jenkins/blue_6.png" alt="blue 6">
+</div>
+<div class="title">Step 6: The build is in progress&#8230;&#8203;</div>
+</div>
+<div class="paragraph">
+<p>&#160;
+&#160;</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="https://raw.githubusercontent.com/CloudPipelines/jenkins/master/docs/images/jenkins/blue_7.png" alt="blue 7">
+</div>
+<div class="title">Step 7: The pipeline is done!</div>
+</div>
+<div class="paragraph">
+<p>&#160;
+&#160;</p>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+There is no possibility of restarting a pipeline from a specific stage after failure.
+See <a href="https://issues.jenkins-ci.org/browse/JENKINS-33846">this issue</a> for more information
+</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-warning" title="Warning"></i>
+</td>
+<td class="content">
+Currently, there is no way to introduce manual steps in a performant way. Jenkins
+blocks an executor when a manual step is required. That means that you run out of executors
+pretty quickly. See <a href="https://issues.jenkins-ci.org/browse/JENKINS-36235">this issue</a>
+and <a href="https://stackoverflow.com/questions/42561241/how-to-wait-for-user-input-in-a-declarative-pipeline-without-blocking-a-heavywei">this StackOverflow question</a>
+for more information.
+</td>
+</tr>
+</table>
+</div>
+</div>
+<link rel="stylesheet" href="js/highlight/styles/atom-one-dark-reasonable.min.css">
+<script src="js/highlight/highlight.min.js"></script>
+<script>hljs.initHighlighting()</script>
+</body>
+</html>

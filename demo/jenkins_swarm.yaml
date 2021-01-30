@@ -1,0 +1,114 @@
+flair-commons:
+  git:
+    - url: DX26-io/flair-commons
+    - branches_to_build:
+      - master: "clean -Pprod deploy"
+    - credential_key_id: git
+  java: 
+    - jdk_version: 8
+  builds:
+    - keep_builds: 5
+    - keep_day: 90
+
+data-studio-gateway:
+  git:
+    - url: DX26-io/data-studio-gateway
+    - branches_to_build:
+      - master: "clean -Pprod,jenkins deploy"
+      - staging: "clean -Pprod,jenkins deploy"
+    - branches_to_deploy:
+      - master
+    - credential_key_id: git
+  java: 
+    - jdk_version: 8
+  builds:
+    - keep_builds: 5
+    - keep_day: 90
+
+flair-engine:
+  git:
+    - url: DX26-io/flair-engine
+    - branches_to_build:
+      - master: "clean -Pprod,jenkins deploy"
+    - branches_to_deploy:
+      - master
+    - credential_key_id: git
+  java: 
+    - jdk_version: 8
+  builds:
+    - keep_builds: 5
+    - keep_day: 90
+  environment:
+    - TEST_DATASOURCE_URL: "jdbc:postgresql://flair-engine-pgsql-test:5432/fbiengine?ssl=false"
+
+flair-query-language:
+  git:
+    - url: DX26-io/flair-query-language
+    - branches_to_build:
+      - master: "clean -Pprod deploy"
+    - credential_key_id: git
+  java: 
+    - jdk_version: 8
+  builds:
+    - keep_builds: 5
+    - keep_day: 90
+
+flair-protobuf-messages:
+  git:
+    - url: DX26-io/flair-protobuf-messages
+    - branches_to_build:
+      - master: "clean -Pprod deploy"
+    - credential_key_id: git
+  java: 
+    - jdk_version: 8
+  builds:
+    - keep_builds: 5
+    - keep_day: 90
+
+flair-cache:
+  git:
+    - url: DX26-io/flair-cache
+    - branches_to_build:
+      - master: "clean -Pprod,jenkins deploy"
+    - branches_to_deploy:
+      - master
+    - credential_key_id: git
+  java: 
+    - jdk_version: 8
+  builds:
+    - keep_builds: 5
+    - keep_day: 90
+
+flair-registry:
+  git:
+    - url: DX26-io/flair-registry
+    - branches_to_build:
+      - master: "clean -Pprod deploy"
+    - branches_to_deploy:
+      - master
+    - credential_key_id: git
+  java: 
+    - jdk_version: 8
+  builds:
+    - keep_builds: 5
+    - keep_day: 90
+
+flair-notifications:
+  type: node
+  git:
+    - url: DX26-io/flair-notifications
+    - branches_to_build:
+      - master
+      - eureka
+    - credential_key_id: git-ssh
+    - branches_to_deploy:
+      - master
+  builds:
+    - keep_builds: 5
+    - keep_day: 90
+  environment:
+    - COMPOSE_DEPLOY_SETUP: "deploy/deploy.yml"
+    - NODE_ENV: "production"
+
+
+    

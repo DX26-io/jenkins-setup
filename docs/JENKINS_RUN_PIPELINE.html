@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge"><![endif]-->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 1.5.8">
+<title>Untitled</title>
+<link rel="stylesheet" href="css/spring.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+</head>
+<body class="article">
+<div id="header">
+</div>
+<div id="content">
+<div class="paragraph">
+<p>We already created the seed job for you, but you have to run it. When you do
+run it, you have to provide some properties. By default, we create a seed that
+has all the properties options, but you can delete most of it. If you
+set the properties as global environment variables, you have to remove them from the
+seed.</p>
+</div>
+<div class="paragraph">
+<p>To run the demo, provide a comma-separated
+ list of URLs of the two aforementioned forks (<code>github-webhook</code> and <code>github-analytics</code>) in the <code>REPOS</code> variable.</p>
+</div>
+<div class="paragraph">
+<p>The following images shows the steps involved:</p>
+</div>
+<div class="paragraph">
+<p>&#160;
+&#160;</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="https://raw.githubusercontent.com/CloudPipelines/jenkins/master/docs/images/jenkins/seed_views.png" alt="seed views">
+</div>
+<div class="title">Step 1: Click the 'github-webhook' view</div>
+</div>
+<div class="paragraph">
+<p>&#160;
+&#160;</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="https://raw.githubusercontent.com/CloudPipelines/jenkins/master/docs/images/jenkins/pipeline_run.png" alt="pipeline run">
+</div>
+<div class="title">Step 2: Run the pipeline</div>
+</div>
+<div class="paragraph">
+<p>&#160;
+&#160;</p>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+If your build fails on <strong>deploy previous version to stage</strong> due to a missing jar,
+that means that you forgot to clear the tags in your repository. Typically, that happens because
+you removed the Artifactory volume with a deployed jar while a tag in the repository still points there.
+See <a href="#tags">here</a> for how to remove the tag.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>&#160;
+&#160;</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="https://raw.githubusercontent.com/CloudPipelines/jenkins/master/docs/images/jenkins/pipeline_manual.png" alt="pipeline manual">
+</div>
+<div class="title">Step 3: Click the manual step to go to stage (remember about killing the apps on test env). To do this click the <strong>ARROW</strong> next to the job name</div>
+</div>
+<div class="paragraph">
+<p>&#160;
+&#160;</p>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+Servers often run run out of resources at the stage step.
+For that reason, we suggest killing all applications on test. See the <a href="#faq">FAQ</a> for more detail.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>&#160;
+&#160;</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="https://raw.githubusercontent.com/CloudPipelines/jenkins/master/docs/images/jenkins/pipeline_finished.png" alt="pipeline finished">
+</div>
+<div class="title">Step 4: The full pipeline should look like this</div>
+</div>
+<div class="paragraph">
+<p>&#160;
+&#160;</p>
+</div>
+</div>
+<link rel="stylesheet" href="js/highlight/styles/atom-one-dark-reasonable.min.css">
+<script src="js/highlight/highlight.min.js"></script>
+<script>hljs.initHighlighting()</script>
+</body>
+</html>

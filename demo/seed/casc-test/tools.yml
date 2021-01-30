@@ -1,0 +1,34 @@
+tool:
+  git:
+    installations:
+    - home: "git"
+      name: "Default"
+  jdk:
+    installations:
+    - home: "/usr/local/openjdk-11/"
+      name: "jdk11"
+  maven:
+    installations:
+    - name: "maven-3"
+      properties:
+      - installSource:
+          installers:
+          - maven:
+              id: "3.3.9"
+  nodejs:
+      installations:
+      - name: "node"
+        properties:
+        - installSource:
+            installers:
+            - nodeJSInstaller:
+                id: "12.9.1"
+                npmPackagesRefreshHours: 72
+  gradle:
+    installations:
+    - name: "gradle-5.6"
+      properties:
+      - installSource:
+          installers:
+          - gradleInstaller:
+              id: "5.6.2"

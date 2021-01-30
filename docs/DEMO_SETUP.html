@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge"><![endif]-->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 1.5.8">
+<title>Untitled</title>
+<link rel="stylesheet" href="css/spring.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+</head>
+<body class="article">
+<div id="header">
+</div>
+<div id="content">
+<div class="imageblock">
+<div class="content">
+<img src="https://raw.githubusercontent.com/CloudPipelines/jenkins/master/docs/images/demo/demo.png" alt="demo">
+</div>
+<div class="title">The overview of the demo: Github Webhook listens to HTTP calls and sends a message to Github Analytics</div>
+</div>
+<div class="paragraph">
+<p>&#160;
+&#160;</p>
+</div>
+<div class="paragraph">
+<p>For the demo scenario we have two applications. <code>Github Analytics</code> and <code>Github Webhook</code>.
+Let&#8217;s imagine a case where Github is emitting events via HTTP. <code>Github Webhook</code> has
+an API that could register to such hooks and receive those messages. Once this happens
+ <code>Github Webhook</code> sends a message by RabbitMQ to a channel. <code>Github Analytics</code> is
+ listening to those messages and stores them in a MySQL database.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="https://raw.githubusercontent.com/CloudPipelines/jenkins/master/docs/images/demo/demo_metrics.png" alt="demo metrics">
+</div>
+<div class="title">Gathering metrics: Github Analytics exposes metrics that are polled by Prometheus</div>
+</div>
+<div class="paragraph">
+<p>&#160;
+&#160;</p>
+</div>
+<div class="paragraph">
+<p><code>Github Analytics</code> has its KPIs (Key Performance Indicators) monitored. In the case
+of that application the KPI is number of issues.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="https://raw.githubusercontent.com/CloudPipelines/jenkins/master/docs/images/demo/demo_alerting.png" alt="demo alerting">
+</div>
+<div class="title">Alerting over metrics: Grafana alerts Slack over Prometheus metrics</div>
+</div>
+<div class="paragraph">
+<p>&#160;
+&#160;</p>
+</div>
+<div class="paragraph">
+<p>Let&#8217;s assume that if we go below the threshold of X issues then an alert should be
+sent to Slack.</p>
+</div>
+</div>
+<link rel="stylesheet" href="js/highlight/styles/atom-one-dark-reasonable.min.css">
+<script src="js/highlight/highlight.min.js"></script>
+<script>hljs.initHighlighting()</script>
+</body>
+</html>

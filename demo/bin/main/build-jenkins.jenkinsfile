@@ -1,0 +1,21 @@
+node {
+	withCredentials([usernamePassword(credentialsId: 'docker-registry', passwordVariable: 'PASS', usernameVariable: 'USER')]) {
+		env.DOCKER_HUB_PASSWORD = PASS;
+		env.DOCKER_HUB_USERNAME = USER;
+	}
+	withEnv(['EMAIL=admin@vizcentric.com']) {
+		env.DOCKER_HUB_EMAIL = EMAIL;
+	}
+    
+    
+    stage('Checkout'){
+        def gitCheckout = git credentialsId: 'git', url: 'https://github.com/Cobrijani/flair-jenkins.git'
+        sh "git submodule update --recursive --remote"
+    }
+    
+    stage('Build') {
+    	sh "docker-compose rm -f -s"
+		sh "docker-compose run --rm jenkins-build gradle clean build -PreleaseDocker"
+    }
+   
+}

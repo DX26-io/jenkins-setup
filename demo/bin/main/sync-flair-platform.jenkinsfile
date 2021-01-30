@@ -1,0 +1,16 @@
+node {
+	stage('Checkout'){
+        def gitCheckout = git branch: '$GIT_BRANCH', credentialsId: 'git', url: '$GIT_URL'
+    }
+
+	stage('Authenticate') {
+		withCredentials([file(credentialsId: 'google-account', variable: 'GC_KEY')]) {
+			sh("gcloud auth activate-service-account --key-file=${GC_KEY}")
+			sh("gcloud beta container clusters get-credentials ${GC_CLUSTER} --region ${GC_ZONE} --project ${GC_PROJECT}")
+		}
+	}
+    
+    stage('Sync') {
+    	sh("./chart_repo_index_sink.sh")
+    }
+}

@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge"><![endif]-->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 1.5.8">
+<title>Jenkins FAQ</title>
+<link rel="stylesheet" href="css/spring.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+</head>
+<body class="article toc2 toc-left">
+<div id="header">
+<div id="toc" class="toc2">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#jenkins_faq">Jenkins FAQ</a></li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div class="sect1">
+<h2 id="jenkins_faq"><a class="link" href="#jenkins_faq">Jenkins FAQ</a></h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>This section provides answers to the most frequently asked questions about using Jenkins with Cloud Pipelines.</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">Pipeline version contains ${PIPELINE_VERSION}</dt>
+<dd>
+<p>You can check the Jenkins logs and see the following warning:</p>
+<div class="exampleblock">
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">WARNING: Skipped parameter `PIPELINE_VERSION` as it is undefined on `jenkins-pipeline-sample-build`.
+	Set `-Dhudson.model.ParametersAction.keepUndefinedParameters`=true to allow undefined parameters
+	to be injected as environment variables or
+	`-Dhudson.model.ParametersAction.safeParameters=[comma-separated list]`
+	to whitelist specific parameter names, even though it represents a security breach</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>To fix it, you have to do exactly what the warning suggests. Also, you should ensure that the <code>Groovy token macro processing</code>
+checkbox is set.</p>
+</div>
+</dd>
+<dt class="hdlist1">Pipeline version is not passed to the build</dt>
+<dd>
+<p>You can see that the Jenkins version is properly set. However, in the build version, it is still snapshot and
+the <code>echo "${PIPELINE_VERSION}"</code> does not print anything.</p>
+<div class="paragraph">
+<p>You can check the Jenkins logs and see the following warning:</p>
+</div>
+<div class="exampleblock">
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">WARNING: Skipped parameter `PIPELINE_VERSION` as it is undefined on `jenkins-pipeline-sample-build`.
+	Set `-Dhudson.model.ParametersAction.keepUndefinedParameters`=true to allow undefined parameters
+	to be injected as environment variables or
+	`-Dhudson.model.ParametersAction.safeParameters=[comma-separated list]`
+	to whitelist specific parameter names, even though it represents a security breach</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>To fix it, you have to do exactly what the warning suggests.</p>
+</div>
+</dd>
+<dt class="hdlist1">The build times out with <code>pipeline.sh</code> information</dt>
+<dd>
+<p>This is a Docker compose issue. The problem is that for some reason, only in Docker, the execution of
+Java hangs. However, it hangs randomly and only the first time you try to run the pipeline.</p>
+<div class="paragraph">
+<p>The solution to this issue is to run the pipeline again. If it passes once,
+it will pass for any subsequent build.</p>
+</div>
+<div class="paragraph">
+<p>Another thing that you can try is to run it with plain Docker. That helps sometimes.</p>
+</div>
+</dd>
+<dt class="hdlist1">Can I use the pipeline for some other repositories?</dt>
+<dd>
+<p>Yes. You can pass the <code>REPOS</code> variable with a comma-separated list of
+<code>project_name$project_url</code> format. If you do not provide the <code>PROJECT_NAME</code>, the
+repository name is extracted and used as the name of the project.</p>
+<div class="paragraph">
+<p>For example, a <code>REPOS</code> value equal to <code><a href="https://github.com/spring-cloud-samples/github-analytics,https://github.com/spring-cloud-samples/github-webhook" class="bare">https://github.com/spring-cloud-samples/github-analytics,https://github.com/spring-cloud-samples/github-webhook</a></code>
+results in the creation of pipelines with root names <code>github-analytics</code> and <code>github-webhook</code>.</p>
+</div>
+<div class="paragraph">
+<p>For example, a <code>REPOS</code> equal to <code>myanalytics$https://github.com/spring-cloud-samples/github-analytics,myfeed$https://github.com/spring-cloud-samples/atom-feed</code>
+results in the creation of pipelines with root names <code>myanalytics</code> for <code>github-analytics</code>
+and <code>myfeed</code> for <code>github-webhook</code>.</p>
+</div>
+</dd>
+<dt class="hdlist1">Can this work for ANY project out of the box?</dt>
+<dd>
+<p>Not really. This is an &#8220;opinionated pipeline&#8221;. That is why we took some
+opinionated decisions</p>
+</dd>
+<dt class="hdlist1">Can I modify this to reuse in my project?</dt>
+<dd>
+<p>Yes. It is open-source. The important thing is that the core part of the logic is written
+in Bash scripts. That way, in the majority of cases, you could change only the bash
+scripts without changing the whole pipeline.</p>
+</dd>
+<dt class="hdlist1">The rollback step fails due to a missing JAR</dt>
+<dd>
+<p><a id="jenkins_tags"></a> You must have pushed some tags and have removed the Artifactory volume that
+contained them. To fix this, remove the tags by using the following command:</p>
+<div class="exampleblock">
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ git tag -l | xargs -n 1 git push --delete origin</code></pre>
+</div>
+</div>
+</div>
+</div>
+</dd>
+<dt class="hdlist1">I want to provide a different JDK version.</dt>
+<dd>
+<div class="ulist">
+<ul>
+<li>
+<p>By default, we assume that you have configured a JDK with an ID of <code>jdk8</code>.</p>
+</li>
+<li>
+<p>If you want a different one, override the <code>JDK_VERSION</code> environment variable to point to the proper one.</p>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+The docker image comes in with Java installed at <code>/usr/lib/jvm/java-8-openjdk-amd64</code>.
+You can go to <code>Global Tools</code> and create a JDK with an ID of <code>jdk8</code> and set <code>JAVA_HOME</code>
+to <code>/usr/lib/jvm/java-8-openjdk-amd64</code>.
+</td>
+</tr>
+</table>
+</div>
+</li>
+</ul>
+</div>
+</dd>
+</dl>
+</div>
+<div class="paragraph">
+<p>To change the default settings, follow the steps shown in the following images:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="https://raw.githubusercontent.com/CloudPipelines/jenkins/master/docs/images/jenkins/manage_jenkins.png" alt="manage jenkins">
+</div>
+<div class="title">Step 1: Click 'Manage Jenkins'</div>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="https://raw.githubusercontent.com/CloudPipelines/jenkins/master/docs/images/jenkins/global_tool.png" alt="global tool">
+</div>
+<div class="title">Step 2: Click 'Global Tool'</div>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="https://raw.githubusercontent.com/CloudPipelines/jenkins/master/docs/images/jenkins/jdk_installation.png" alt="jdk installation">
+</div>
+<div class="title">Step 3: Click 'JDK Installations'</div>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="https://raw.githubusercontent.com/CloudPipelines/jenkins/master/docs/images/jenkins/jdk.png" alt="jdk">
+</div>
+<div class="title">Step 4: Fill out JDK Installation with path to your JDK</div>
+</div>
+<div id="groovy-token-macro" class="dlist">
+<dl>
+<dt class="hdlist1">How can I enable groovy token macro processing?</dt>
+<dd>
+<p>We scripted that. However, if you need to this manually, follow the steps shown in the following images:</p>
+</dd>
+</dl>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="https://raw.githubusercontent.com/CloudPipelines/jenkins/master/docs/images/jenkins/manage_jenkins.png" alt="manage jenkins">
+</div>
+<div class="title">Step 1: Click 'Manage Jenkins'</div>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="https://raw.githubusercontent.com/CloudPipelines/jenkins/master/docs/images/jenkins/configure_system.png" alt="configure system">
+</div>
+<div class="title">Step 2: Click 'Configure System'</div>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="https://raw.githubusercontent.com/CloudPipelines/jenkins/master/docs/images/jenkins/groovy_token.png" alt="groovy token">
+</div>
+<div class="title">Step 3: Click 'Allow token macro processing'</div>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">How can I make deployment to stage and prod be automatic?</dt>
+<dd>
+<p>Set the relevant property or environment variable to <code>true</code>:</p>
+<div class="ulist">
+<ul>
+<li>
+<p><code>AUTO_DEPLOY_TO_STAGE</code> to automatically deploy to stage.</p>
+</li>
+<li>
+<p><code>AUTO_DEPLOY_TO_PROD</code> to automatically deploy to prod.</p>
+</li>
+</ul>
+</div>
+</dd>
+<dt class="hdlist1">How can I skip testing API compatibility?</dt>
+<dd>
+<p>Set the <code>API_COMPATIBILITY_STEP_REQUIRED</code> environment variable
+to <code>false</code> and re-run the seed (you can pick it from the seed
+job&#8217;s properties, too).</p>
+</dd>
+<dt class="hdlist1">I can&#8217;t tag the repo.</dt>
+<dd>
+<p>You may get an error similar to the following:</p>
+<div class="exampleblock">
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">19:01:44 stderr: remote: Invalid username or password.
+19:01:44 fatal: Authentication failed for 'https://github.com/marcingrzejszczak/github-webhook/'
+19:01:44
+19:01:44 	at org.jenkinsci.plugins.gitclient.CliGitAPIImpl.launchCommandIn(CliGitAPIImpl.java:1740)
+19:01:44 	at org.jenkinsci.plugins.gitclient.CliGitAPIImpl.launchCommandWithCredentials(CliGitAPIImpl.java:1476)
+19:01:44 	at org.jenkinsci.plugins.gitclient.CliGitAPIImpl.access$300(CliGitAPIImpl.java:63)
+19:01:44 	at org.jenkinsci.plugins.gitclient.CliGitAPIImpl$8.execute(CliGitAPIImpl.java:1816)
+19:01:44 	at hudson.plugins.git.GitPublisher.perform(GitPublisher.java:295)
+19:01:44 	at hudson.tasks.BuildStepMonitor$3.perform(BuildStepMonitor.java:45)
+19:01:44 	at hudson.model.AbstractBuild$AbstractBuildExecution.perform(AbstractBuild.java:779)
+19:01:44 	at hudson.model.AbstractBuild$AbstractBuildExecution.performAllBuildSteps(AbstractBuild.java:720)
+19:01:44 	at hudson.model.Build$BuildExecution.post2(Build.java:185)
+19:01:44 	at hudson.model.AbstractBuild$AbstractBuildExecution.post(AbstractBuild.java:665)
+19:01:44 	at hudson.model.Run.execute(Run.java:1745)
+19:01:44 	at hudson.model.FreeStyleBuild.run(FreeStyleBuild.java:43)
+19:01:44 	at hudson.model.ResourceController.execute(ResourceController.java:98)
+19:01:44 	at hudson.model.Executor.run(Executor.java:404)</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Most likely, you passed a wrong password. Check the <a href="#jenkins_credentials">credentials</a> section
+for how to update your credentials.</p>
+</div>
+</dd>
+<dt class="hdlist1">I am unauthorized to deploy infrastructure jars.</dt>
+<dd>
+<p>Most likely, you forgot to update your local <code>settings.xml</code> file with the Artifactory&#8217;s
+setup. Check out <a href="#jenkins_settings">this section of the docs and update your <code>settings.xml</code> file</a>.</p>
+</dd>
+<dt class="hdlist1">Signing Artifacts</dt>
+<dd>
+<p>In some cases, it may be required that, when you perform a release, that the artifacts be signed
+before you push them to the repository.
+To do this, you  need to import your GPG keys into the Docker image that runs Jenkins.
+This can be done by placing a file called <code>public.key</code> that contains your public key
+and a file called <code>private.key</code> that contains your private key in the <code>seed</code> directory.
+These keys are imported by the <code>init.groovy</code> script runs when Jenkins starts.</p>
+</dd>
+<dt class="hdlist1">Using SSH keys for Git</dt>
+<dd>
+<p>The seed job checks whether an environment variable called <code>GIT_USE_SSH_KEY</code> is set to <code>true</code>. If it is <code>true</code>, the
+environment variable called <code>GIT_SSH_CREDENTIAL_ID</code> is chosen as the one that contains the
+ID of the credential that contains SSH private key. By default, <code>GIT_CREDENTIAL_ID</code> is picked
+as the one that contains the username and password to connect to git.</p>
+<div class="paragraph">
+<p>You can set these values in the seed job by filling out the form and toggling a checkbox.</p>
+</div>
+</dd>
+<dt class="hdlist1">Deploy to stage fails and does not redeploy a service (Kubernetes).</dt>
+<dd>
+<p>There can be a number of reasons for this issue. Remember, though, that, for stage, we
+assume that a sequence of manual steps needs to be performed. We do not
+redeploy any existing services, because, most likely, you deliberately
+have it set up that way. If, in the logs of your application,
+you can see that you cannot connect to a service, first ensure that
+the service is forwarding traffic to a pod. Next, if that is not the case,
+delete the service and re-run the step in the pipeline. That way,
+Cloud Pipelines redeploy the service and the underlying pods.</p>
+</dd>
+</dl>
+</div>
+</div>
+</div>
+</div>
+<link rel="stylesheet" href="js/highlight/styles/atom-one-dark-reasonable.min.css">
+<script src="js/highlight/highlight.min.js"></script>
+<script>hljs.initHighlighting()</script>
+</body>
+</html>

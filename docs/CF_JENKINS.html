@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge"><![endif]-->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 1.5.8">
+<title>Jenkins Pipeline (Cloud Foundry)</title>
+<link rel="stylesheet" href="css/spring.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+</head>
+<body class="article toc2 toc-left">
+<div id="header">
+<div id="toc" class="toc2">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#jenkins-pipeline-cf">Jenkins Pipeline (Cloud Foundry)</a>
+<ul class="sectlevel2">
+<li><a href="#step-by-step-cf">Step-by-step</a></li>
+<li><a href="#declarative-pipeline-cf">Declarative Pipeline &amp; Blue Ocean</a></li>
+<li><a href="#optional-steps-cf">Jenkins Cloud Foundry Customization</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div class="sect1">
+<h2 id="jenkins-pipeline-cf"><a class="link" href="#jenkins-pipeline-cf">Jenkins Pipeline (Cloud Foundry)</a></h2>
+<div class="sectionbody">
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+In this chapter, we assume that you deploy your Java application
+to Cloud Foundry PaaS. The chosen language is just an example, you could perform
+similar tasks with another language.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p><a id="jenkins"></a> The Cloud Pipelines repository contains job definitions and the opinionated setup pipeline, which uses the <a href="https://wiki.jenkins-ci.org/display/JENKINS/Job+DSL+Plugin">Jenkins Job DSL plugin</a>. Those jobs form an empty pipeline and a opinionated sample pipeline that you can use in your company.</p>
+</div>
+<div class="paragraph">
+<p>The following projects take part in the <code>microservice setup</code> for this demo.</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="https://github.com/spring-cloud-samples/github-analytics">Github Analytics</a>: The app that has a REST endpoint and uses messaging&#8201;&#8212;&#8201;part off our business application.</p>
+</li>
+<li>
+<p><a href="https://github.com/spring-cloud-samples/github-webhook">Github Webhook</a>: Project that emits messages that are used by Github Analytics&#8201;&#8212;&#8201;part of our business application.</p>
+</li>
+<li>
+<p><a href="https://github.com/spring-cloud-samples/github-eureka">Eureka</a>: Simple Eureka Server. This is an infrastructure application.</p>
+</li>
+<li>
+<p><a href="https://github.com/spring-cloud-samples/github-analytics-stub-runner-boot">Github Analytics Stub Runner Boot</a>: Stub Runner Boot server to be used for tests with Github Analytics and using Eureka and Messaging. This is an infrastructure application.</p>
+</li>
+</ul>
+</div>
+<div class="sect2">
+<h3 id="step-by-step-cf"><a class="link" href="#step-by-step-cf">Step-by-step</a></h3>
+<div class="paragraph">
+<p>This is a guide for the Jenkins Job DSL based pipeline.</p>
+</div>
+<div class="paragraph">
+<p>If you want only to run the demo as far as possible using PCF Dev and Docker Compose, do the following:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p><a href="#jenkins-fork-cf">Fork Repositories</a></p>
+</li>
+<li>
+<p><a href="#jenkins-start-cf">Start Jenkins and Artifactory</a></p>
+</li>
+<li>
+<p><a href="#jenkins-deploy-cf">Deploy infra to Artifactory</a></p>
+</li>
+<li>
+<p><a href="#jenkins-pcfdev-cf">Start PCF Dev (if you do not want to use an existing one)</a></p>
+</li>
+<li>
+<p><a href="#jenkins-seed-cf">Run the Seed Job</a></p>
+</li>
+<li>
+<p><a href="#jenkins-pipeline-cf">Run the <code>github-webhook</code> Pipeline</a></p>
+</li>
+</ol>
+</div>
+<div class="sect3">
+<h4 id="fork-repos-cf"><a class="link" href="#fork-repos-cf">Fork Repositories</a></h4>
+<div id="jenkins-fork-cf" class="paragraph">
+<p>Four applications compose the pipeline:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="https://github.com/spring-cloud-samples/github-webhook">Github Webhook</a></p>
+</li>
+<li>
+<p><a href="https://github.com/spring-cloud-samples/github-analytics/">Github Analytics</a></p>
+</li>
+<li>
+<p><a href="https://github.com/spring-cloud-samples/github-eureka">Github Eureka</a></p>
+</li>
+<li>
+<p><a href="https://github.com/spring-cloud-samples/github-analytics-stub-runner-boot">Github Stub Runner Boot</a></p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>You need to fork only the following, because only then can you tag and push the tag to your repository:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="https://github.com/spring-cloud-samples/github-webhook">Github Webhook</a></p>
+</li>
+<li>
+<p><a href="https://github.com/spring-cloud-samples/github-analytics/">Github Analytics</a></p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect3">
+<h4 id="start-jenkins-cf"><a class="link" href="#start-jenkins-cf">Start Jenkins and Artifactory</a></h4>
+<div id="jenkins-start-cf" class="paragraph">
+<p>Jenkins + Artifactory can be ran locally. To do so, run the
+<code>start.sh</code> script from this repository. The following listing shows the script:</p>
+</div>
+<div class="exampleblock">
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">git clone https://github.com/CloudPipelines/jenkins
+cd jenkins/demo
+./start.sh yourGitUsername yourGitPassword yourForkedGithubOrg</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Then Jenkins runs on port <code>8080</code>, and Artifactory runs on port <code>8081</code>.
+The parameters are passed as environment variables to the Jenkins VM,
+and credentials are set. That way, you need not do
+any manual work on the Jenkins side. In the above parameters, the third parameter
+could be <code>yourForkedGithubOrg</code> or <code>yourGithubUsername</code>. Also the <code>REPOS</code> environment variable
+contains your GitHub org (in which you have the forked repos).</p>
+</div>
+<div class="paragraph">
+<p>Instead of the Git username and password parameters, you could pass <code>-key &lt;path_to_private_key&gt;</code>
+(if you prefer to use key-based authentication with your Git repositories).</p>
+</div>
+<div class="sect4">
+<h5 id="deploy-infra-cf"><a class="link" href="#deploy-infra-cf">Deploy the Infra JARs to Artifactory</a></h5>
+<div id="jenkins-deploy-cf" class="paragraph">
+<p>When Artifactory is running, run the <code>tools/deploy-infra.sh</code> script from this repo. The following listing shows the script:</p>
+</div>
+<div class="exampleblock">
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">git clone https://github.com/CloudPipelines/jenkins
+cd jenkins/
+./tools/deploy-infra.sh</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>As a result, both the <code>eureka</code> and <code>stub runner</code> repositories are cloned, built,
+and uploaded to Artifactory.</p>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="start-pcf-dev-cf"><a class="link" href="#start-pcf-dev-cf">Start PCF Dev</a></h4>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+You can skip this step if you have CF installed and do not want to use PCF Dev.
+In that case, the only thing you have to do is to set up spaces.
+</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-warning" title="Warning"></i>
+</td>
+<td class="content">
+Servers often run run out of resources at the stage step.
+If that happens <a href="#jenkins-cf-resources">clear some apps from PCF Dev and continue</a>.
+</td>
+</tr>
+</table>
+</div>
+<div id="jenkins-pcfdev-cf" class="paragraph">
+<p>You have to download and start PCF Dev, as described <a href="https://pivotal.io/platform/pcf-tutorials/getting-started-with-pivotal-cloud-foundry-dev/install-pcf-dev">here.</a></p>
+</div>
+<div class="paragraph">
+<p>The default credentials when using PCF Dev are as follows:</p>
+</div>
+<div class="exampleblock">
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">username: user
+password: pass
+email: user
+org: pcfdev-org
+space: pcfdev-space
+api: api.local.pcfdev.io</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>You can start PCF Dev as follows:</p>
+</div>
+<div class="exampleblock">
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">cf dev start</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>You must create three separate spaces, as follows:</p>
+</div>
+<div class="exampleblock">
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">cf login -a https://api.local.pcfdev.io --skip-ssl-validation -u admin -p admin -o pcfdev-org
+
+cf create-space pcfdev-test
+cf set-space-role user pcfdev-org pcfdev-test SpaceDeveloper
+cf create-space pcfdev-stage
+cf set-space-role user pcfdev-org pcfdev-stage SpaceDeveloper
+cf create-space pcfdev-prod
+cf set-space-role user pcfdev-org pcfdev-prod SpaceDeveloper</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>You can also run the <code>./tools/cf-helper.sh setup-spaces</code> script to do this.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="jenkins-seed-cf"><a class="link" href="#jenkins-seed-cf">Run the Seed Job</a></h4>
+<div class="paragraph">
+<p>We created the seed job for you, but you have to run it. When you do
+run it, you have to provide some properties. By default we create a seed that
+has all the properties options, but you can delete most of it. If you
+set the properties as global environment variables, you have to remove them from the
+seed.</p>
+</div>
+<div class="paragraph">
+<p>To run the demo, provide a comma-separated
+list of the URLs of the two aforementioned forks (<code>github-webhook</code> and <code>github-analytics') in the `REPOS</code> variable.</p>
+</div>
+<div class="paragraph">
+<p>The following images shows the steps involved:</p>
+</div>
+<div class="paragraph">
+<p>&#160;
+&#160;</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="https://raw.githubusercontent.com/CloudPipelines/jenkins/master/docs/images/jenkins/seed_click.png" alt="seed click">
+</div>
+<div class="title">Step 1: Click the 'jenkins-pipeline-seed-cf' job for Cloud Foundry and <code>jenkins-pipeline-seed-k8s</code> for Kubernetes</div>
+</div>
+<div class="paragraph">
+<p>&#160;
+&#160;</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="https://raw.githubusercontent.com/CloudPipelines/jenkins/master/docs/images/jenkins/seed_run.png" alt="seed run">
+</div>
+<div class="title">Step 2: Click the 'Build with parameters'</div>
+</div>
+<div class="paragraph">
+<p>&#160;
+&#160;</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="https://raw.githubusercontent.com/CloudPipelines/jenkins/master/docs/images/jenkins/seed.png" alt="seed">
+</div>
+<div class="title">Step 3: The <code>REPOS</code> parameter should already contain your forked repos (you&#8217;ll have more properties than the ones in the screenshot)</div>
+</div>
+<div class="paragraph">
+<p>&#160;
+&#160;</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="https://raw.githubusercontent.com/CloudPipelines/jenkins/master/docs/images/jenkins/seed_built.png" alt="seed built">
+</div>
+<div class="title">Step 4: This is how the results of seed should look like</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="jenkins-run-pipeline-cf"><a class="link" href="#jenkins-run-pipeline-cf">Run the <code>github-webhook</code> Pipeline</a></h4>
+<div class="paragraph">
+<p>We already created the seed job for you, but you have to run it. When you do
+run it, you have to provide some properties. By default, we create a seed that
+has all the properties options, but you can delete most of it. If you
+set the properties as global environment variables, you have to remove them from the
+seed.</p>
+</div>
+<div class="paragraph">
+<p>To run the demo, provide a comma-separated
+ list of URLs of the two aforementioned forks (<code>github-webhook</code> and <code>github-analytics</code>) in the <code>REPOS</code> variable.</p>
+</div>
+<div class="paragraph">
+<p>The following images shows the steps involved:</p>
+</div>
+<div class="paragraph">
+<p>&#160;
+&#160;</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="https://raw.githubusercontent.com/CloudPipelines/jenkins/master/docs/images/jenkins/seed_views.png" alt="seed views">
+</div>
+<div class="title">Step 1: Click the 'github-webhook' view</div>
+</div>
+<div class="paragraph">
+<p>&#160;
+&#160;</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="https://raw.githubusercontent.com/CloudPipelines/jenkins/master/docs/images/jenkins/pipeline_run.png" alt="pipeline run">
+</div>
+<div class="title">Step 2: Run the pipeline</div>
+</div>
+<div class="paragraph">
+<p>&#160;
+&#160;</p>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+If your build fails on <strong>deploy previous version to stage</strong> due to a missing jar,
+that means that you forgot to clear the tags in your repository. Typically, that happens because
+you removed the Artifactory volume with a deployed jar while a tag in the repository still points there.
+See <a href="#tags">here</a> for how to remove the tag.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>&#160;
+&#160;</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="https://raw.githubusercontent.com/CloudPipelines/jenkins/master/docs/images/jenkins/pipeline_manual.png" alt="pipeline manual">
+</div>
+<div class="title">Step 3: Click the manual step to go to stage (remember about killing the apps on test env). To do this click the <strong>ARROW</strong> next to the job name</div>
+</div>
+<div class="paragraph">
+<p>&#160;
+&#160;</p>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+Servers often run run out of resources at the stage step.
+For that reason, we suggest killing all applications on test. See the <a href="#faq">FAQ</a> for more detail.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>&#160;
+&#160;</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="https://raw.githubusercontent.com/CloudPipelines/jenkins/master/docs/images/jenkins/pipeline_finished.png" alt="pipeline finished">
+</div>
+<div class="title">Step 4: The full pipeline should look like this</div>
+</div>
+<div class="paragraph">
+<p>&#160;
+&#160;</p>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="declarative-pipeline-cf"><a class="link" href="#declarative-pipeline-cf">Declarative Pipeline &amp; Blue Ocean</a></h3>
+<div class="paragraph">
+<p>You can also use the <a href="https://jenkins.io/doc/book/pipeline/syntax/">declarative pipeline</a> approach with the
+<a href="https://jenkins.io/projects/blueocean/">Blue Ocean UI</a>.</p>
+</div>
+<div class="paragraph">
+<p>The Blue Ocean UI is available under the <code>blue/</code> URL (for example, for Docker Machine-based setup: <code><a href="https://192.168.99.100:8080/blue" class="bare">https://192.168.99.100:8080/blue</a></code>).</p>
+</div>
+<div class="paragraph">
+<p>The following images show the various steps involved:</p>
+</div>
+<div class="paragraph">
+<p>&#160;
+&#160;</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="https://raw.githubusercontent.com/CloudPipelines/jenkins/master/docs/images/jenkins/blue_1.png" alt="blue 1">
+</div>
+<div class="title">Step 1: Open Blue Ocean UI and click on <code>github-webhook-declarative-pipeline</code></div>
+</div>
+<div class="paragraph">
+<p>&#160;
+&#160;</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="https://raw.githubusercontent.com/CloudPipelines/jenkins/master/docs/images/jenkins/blue_2.png" alt="blue 2">
+</div>
+<div class="title">Step 2: Your first run will look like this. Click <code>Run</code> button</div>
+</div>
+<div class="paragraph">
+<p>&#160;
+&#160;</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="https://raw.githubusercontent.com/CloudPipelines/jenkins/master/docs/images/jenkins/blue_3.png" alt="blue 3">
+</div>
+<div class="title">Step 3: Enter parameters required for the build and click <code>run</code></div>
+</div>
+<div class="paragraph">
+<p>&#160;
+&#160;</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="https://raw.githubusercontent.com/CloudPipelines/jenkins/master/docs/images/jenkins/blue_4.png" alt="blue 4">
+</div>
+<div class="title">Step 4: A list of pipelines will be shown. Click your first run.</div>
+</div>
+<div class="paragraph">
+<p>&#160;
+&#160;</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="https://raw.githubusercontent.com/CloudPipelines/jenkins/master/docs/images/jenkins/blue_5.png" alt="blue 5">
+</div>
+<div class="title">Step 5: State if you want to go to production or not and click <code>Proceed</code></div>
+</div>
+<div class="paragraph">
+<p>&#160;
+&#160;</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="https://raw.githubusercontent.com/CloudPipelines/jenkins/master/docs/images/jenkins/blue_6.png" alt="blue 6">
+</div>
+<div class="title">Step 6: The build is in progress&#8230;&#8203;</div>
+</div>
+<div class="paragraph">
+<p>&#160;
+&#160;</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="https://raw.githubusercontent.com/CloudPipelines/jenkins/master/docs/images/jenkins/blue_7.png" alt="blue 7">
+</div>
+<div class="title">Step 7: The pipeline is done!</div>
+</div>
+<div class="paragraph">
+<p>&#160;
+&#160;</p>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+There is no possibility of restarting a pipeline from a specific stage after failure.
+See <a href="https://issues.jenkins-ci.org/browse/JENKINS-33846">this issue</a> for more information
+</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-warning" title="Warning"></i>
+</td>
+<td class="content">
+Currently, there is no way to introduce manual steps in a performant way. Jenkins
+blocks an executor when a manual step is required. That means that you run out of executors
+pretty quickly. See <a href="https://issues.jenkins-ci.org/browse/JENKINS-36235">this issue</a>
+and <a href="https://stackoverflow.com/questions/42561241/how-to-wait-for-user-input-in-a-declarative-pipeline-without-blocking-a-heavywei">this StackOverflow question</a>
+for more information.
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="optional-steps-cf"><a class="link" href="#optional-steps-cf">Jenkins Cloud Foundry Customization</a></h3>
+<div class="paragraph">
+<p>You can customize Jenkins for Cloud Foundry by setting a variety of environment variables.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+You need not see all the environment variables described in this section to run the demo. They are needed only
+when you want to make custom changes.
+</td>
+</tr>
+</table>
+</div>
+<div class="sect3">
+<h4 id="all-env-vars-cf"><a class="link" href="#all-env-vars-cf">Environment Variable Summary</a></h4>
+<div class="paragraph">
+<p>The environment variables that are used in all of the jobs are as follows:</p>
+</div>
+<table class="tableblock frame-topbot grid-all stretch">
+<colgroup>
+<col style="width: 33.3333%;">
+<col style="width: 33.3333%;">
+<col style="width: 33.3334%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Property Name</th>
+<th class="tableblock halign-left valign-top">Property Description</th>
+<th class="tableblock halign-left valign-top">Default value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>PAAS_TEST_API_URL</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The URL to the CF API for the TEST environment</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>api.local.pcfdev.io</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>PAAS_STAGE_API_URL</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The URL to the CF API for the STAGE environment</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>api.local.pcfdev.io</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>PAAS_PROD_API_URL</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The URL to the CF API for the PROD environment</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>api.local.pcfdev.io</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>PAAS_TEST_ORG</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Name of the org for the test env</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>pcfdev-org</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>PAAS_TEST_SPACE_PREFIX</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Prefix of the name of the CF space for the test environment to which the app name is appended</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>cloudpipelines-test</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>PAAS_STAGE_ORG</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Name of the org for the stage environment</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>pcfdev-org</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>PAAS_STAGE_SPACE</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Name of the space for the stage environment</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>cloudpipelines-stage</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>PAAS_PROD_ORG</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Name of the org for the prod environment</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>pcfdev-org</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>PAAS_PROD_SPACE</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Name of the space for the prod environment</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>cloudpipelines-prod</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>REPO_WITH_BINARIES_FOR_UPLOAD</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">URL of the repository with the deployed jars</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code><a href="https://artifactory:8081/artifactory/libs-release-local" class="bare">https://artifactory:8081/artifactory/libs-release-local</a></code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>M2_SETTINGS_REPO_ID</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The ID of server from Maven <code>settings.xml</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>artifactory-local</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>JDK_VERSION</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The name of the JDK installation</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>jdk8</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>PIPELINE_VERSION</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The version of the pipeline (ultimately, also the version of the jar)</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>1.0.0.M1-${GROOVY,script ="new Date().format('yyMMdd_HHmmss')"}-VERSION</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>GIT_EMAIL</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The email used by Git to tag the repository</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>email@example.com</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>GIT_NAME</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The name used by Git to tag the repository</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Pivo Tal</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>PAAS_HOSTNAME_UUID</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Additional suffix for the route. In a shared environment, the default routes can be already taken</p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>AUTO_DEPLOY_TO_STAGE</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Whether deployment to stage be automatic</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>false</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>AUTO_DEPLOY_TO_PROD</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Whether deployment to prod be automatic</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>false</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>API_COMPATIBILITY_STEP_REQUIRED</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Whether the API compatibility step is required</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>true</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>DB_ROLLBACK_STEP_REQUIRED</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Whether the DB rollback step is present</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>true</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>DEPLOY_TO_STAGE_STEP_REQUIRED</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Whether to the deploy-to-stage step be present</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>true</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>BUILD_OPTIONS</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Additional options you would like to pass to the Maven / Gradle build</p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+</tbody>
+<tfoot>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>BINARY_EXTENSION</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Extension of the binary uploaded to Artifactory / Nexus. Example: <code>war</code> for WAR artifacts</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>jar</code></p></td>
+</tr>
+</tfoot>
+</table>
+</div>
+<div class="sect3">
+<h4 id="jenkins-credentials-cf"><a class="link" href="#jenkins-credentials-cf">Jenkins Credentials</a></h4>
+<div class="paragraph">
+<p>Our scripts reference the credentials by IDs. The following table describes the defaults for the credentials:</p>
+</div>
+<table class="tableblock frame-topbot grid-all stretch">
+<colgroup>
+<col style="width: 33.3333%;">
+<col style="width: 33.3333%;">
+<col style="width: 33.3334%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Property Name</th>
+<th class="tableblock halign-left valign-top">Property Description</th>
+<th class="tableblock halign-left valign-top">Default value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>GIT_CREDENTIAL_ID</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Credential ID used to tag a Git repo</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>git</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>GIT_SSH_CREDENTIAL_ID</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">SSH credential ID used to tag a Git repo</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>gitSsh</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>GIT_USE_SSH_KEY</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">If <code>true</code>, pick the SSH credential id to use</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>false</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>REPO_WITH_BINARIES_CREDENTIAL_ID</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Credential ID used for the repository with jars</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>repo-with-binaries</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>PAAS_TEST_CREDENTIAL_ID</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Credential ID for CF Test environment access</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>cf-test</code></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>PAAS_STAGE_CREDENTIAL_ID</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Credential ID for CF Stage environment access</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>cf-stage</code></p></td>
+</tr>
+</tbody>
+<tfoot>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>PAAS_PROD_CREDENTIAL_ID</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Credential ID for CF Prod environment access</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>cf-prod</code></p></td>
+</tr>
+</tfoot>
+</table>
+<div class="paragraph">
+<p>If you already have in your system a credential to (for example) tag a repository,
+you can use it by passing the value of the <code>GIT_CREDENTIAL_ID</code> property.</p>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+See the <code>cf-helper</code> script for all the configuration options.
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<link rel="stylesheet" href="js/highlight/styles/atom-one-dark-reasonable.min.css">
+<script src="js/highlight/highlight.min.js"></script>
+<script>hljs.initHighlighting()</script>
+</body>
+</html>

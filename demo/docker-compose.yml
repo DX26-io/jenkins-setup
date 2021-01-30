@@ -1,0 +1,57 @@
+version: "3.3"
+services:
+  jenkins:
+    container_name: "jenkins"
+    image: flairbi/jenkins
+    build:
+      context: .
+    env_file: env.properties
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=traefik"
+      - "traefik.http.routers.jenkins.rule=Host(`jenkins.cobrijani.com`)"
+      - "traefik.http.routers.jenkins.entrypoints=websecure"
+      - "traefik.http.routers.jenkins.tls.certresolver=mydnschallenge"
+    environment:
+      CASC_JENKINS_CONFIG: /var/jenkins_home/casc_configs
+    volumes:
+      - jenkins_home:/var/jenkins_home
+      - jenkins_root:/root/
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./jenkins_swarm.yaml:/var/jenkins_home/job_dsl_script/jenkins_swarm.yaml
+      - ./seed/casc/:/var/jenkins_home/casc_configs/
+    networks:
+      - jenkins
+      - traefik
+  test-jenkins:
+    image: flairbi/jenkins
+    container_name: "testjenkins"
+    env_file: env.properties
+    environment:
+      CASC_JENKINS_CONFIG: /var/jenkins_home/casc_configs
+    ports:
+      - "50001:50000"
+      - "8761:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./jenkins_swarm.yaml:/var/jenkins_home/job_dsl_script/jenkins_swarm.yaml
+      - ./seed/casc-test/:/var/jenkins_home/casc_configs/
+    networks:
+      - jenkins
+
+
+volumes:
+  jenkins_home:
+    external:
+      name: jenkins_home
+  jenkins_root:
+    external:
+      name: jenkins_root
+
+networks:
+  jenkins:
+    external:
+      name: jenkins
+  traefik:
+    external:
+      name: traefik

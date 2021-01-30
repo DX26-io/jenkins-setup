@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge"><![endif]-->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 1.5.8">
+<title>Kubernetes Setup</title>
+<link rel="stylesheet" href="css/spring.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+</head>
+<body class="article toc2 toc-left">
+<div id="header">
+<div id="toc" class="toc2">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#kubernetes-setup">Kubernetes Setup</a>
+<ul class="sectlevel2">
+<li><a href="#kubernetes-cli-installation">Kubernetes CLI Installation</a></li>
+<li><a href="#start-minikube-k8s">Kubernetes Cluster Setup</a></li>
+<li><a href="#run-minikube">Run Minikube</a></li>
+<li><a href="#certificates-and-workers">Certificates and Workers</a></li>
+<li><a href="#generate-minikube-namespaces">Generate Minikube Namespaces</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div class="sect1">
+<h2 id="kubernetes-setup"><a class="link" href="#kubernetes-setup">Kubernetes Setup</a></h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>This section describes how to set up Kubernetes.</p>
+</div>
+<div class="sect2">
+<h3 id="kubernetes-cli-installation"><a class="link" href="#kubernetes-cli-installation">Kubernetes CLI Installation</a></h3>
+<div class="paragraph">
+<p>First, you need to install the <code>kubectl</code> command-line interface (CLI).</p>
+</div>
+<div class="sect3">
+<h4 id="kubernetes-cli-script"><a class="link" href="#kubernetes-cli-script">Script Installation</a></h4>
+<div class="paragraph">
+<p>You can use the <code>tools/k8s-helper.sh</code> script to install <code>kubectl</code>. To do so, run the following script:</p>
+</div>
+<div class="exampleblock">
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ ./tools/minikube-helper download-kubectl</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Then the <code>kubectl</code> gets downloaded.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="kubernetes-cli-manual"><a class="link" href="#kubernetes-cli-manual">Manual Installation</a></h4>
+<div class="paragraph">
+<p>You can perform a manual installation for either OSX or Linux.</p>
+</div>
+<div class="sect4">
+<h5 id="example-for-osx"><a class="link" href="#example-for-osx">Example for OSX</a></h5>
+<div class="paragraph">
+<p>The following listing shows how to manually install on OSX:</p>
+</div>
+<div class="exampleblock">
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/darwin/amd64/kubectl
+$ chmod +x ./kubectl
+$ sudo mv ./kubectl /usr/local/bin/kubectl
+----</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect4">
+<h5 id="example-for-linux"><a class="link" href="#example-for-linux">Example for Linux</a></h5>
+<div class="paragraph">
+<p>The following listing shows how to manually install on Linux:</p>
+</div>
+<div class="exampleblock">
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
+$ chmod +x ./kubectl
+$ sudo mv ./kubectl /usr/local/bin/kubectl</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>See <a href="https://kubernetes.io/docs/tasks/tools/install-kubectl/">this page</a> for more information.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="start-minikube-k8s"><a class="link" href="#start-minikube-k8s">Kubernetes Cluster Setup</a></h3>
+<div class="paragraph">
+<p>We need a cluster of Kubernetes. The best choice is <a href="https://github.com/kubernetes/minikube">Minikube</a>.</p>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+You can skip this step if you have a Kubernetes cluster installed and do not
+want to use Minikube. In that case, the only thing you have to do is to set up spaces.
+</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-warning" title="Warning"></i>
+</td>
+<td class="content">
+Servers often run run out of resources at the stage step.
+If that happens, <a href="#jenkins-resources-k8s">clear some apps from PCF Dev and continue</a>.
+</td>
+</tr>
+</table>
+</div>
+<div class="sect3">
+<h4 id="kubernetes-minikube-script"><a class="link" href="#kubernetes-minikube-script">Script Installation</a></h4>
+<div class="paragraph">
+<p>You can use the <code>tools/k8s-helper.sh</code> script to install <code>Minikube</code>. To do so, run the following script:</p>
+</div>
+<div class="exampleblock">
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ ./tools/minikube-helper download-minikube</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Then the <code>Minikube</code> cluster gets downloaded.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="kubernetes-minikube-manual"><a class="link" href="#kubernetes-minikube-manual">Manual Installation</a></h4>
+<div class="paragraph">
+<p>You can perform a manual installation for either OSX or Linux.</p>
+</div>
+<div class="sect4">
+<h5 id="example-for-osx-2"><a class="link" href="#example-for-osx-2">Example for OSX</a></h5>
+<div class="paragraph">
+<p>The following listing shows how to manually install on OSX:</p>
+</div>
+<div class="exampleblock">
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ curl -Lo minikube https://storage.googleapis.com/minikube/releases/v0.20.0/minikube-darwin-amd64 &amp;&amp; chmod +x minikube &amp;&amp; sudo mv minikube /usr/local/bin/</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Feel free to skip running <code>sudo mv minikube /usr/local/bin</code> if you want to add minikube to your path manually.</p>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="example-for-linux-2"><a class="link" href="#example-for-linux-2">Example for Linux</a></h4>
+<div class="paragraph">
+<p>The following listing shows how to manually install on Linux:</p>
+</div>
+<div class="exampleblock">
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ curl -Lo minikube https://storage.googleapis.com/minikube/releases/v0.20.0/minikube-linux-amd64 &amp;&amp; chmod +x minikube &amp;&amp; sudo mv minikube /usr/local/bin/</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>You can skip running <code>sudo mv minikube /usr/local/bin</code> if you want to add minikube to your path manually.
+See <a href="https://github.com/kubernetes/minikube/releases">this page</a> for more information on the installation.</p>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="run-minikube"><a class="link" href="#run-minikube">Run Minikube</a></h3>
+<div class="paragraph">
+<p>To start Kubernetes on your local box, run <code>minikube start</code>.</p>
+</div>
+<div class="paragraph">
+<p>To add the dashboard, run <code>minikube dashboard</code>.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="certificates-and-workers"><a class="link" href="#certificates-and-workers">Certificates and Workers</a></h3>
+<div class="sect3">
+<h4 id="minikube-certificates-and-workers"><a class="link" href="#minikube-certificates-and-workers">Minikube Certificates and Workers</a></h4>
+<div class="paragraph">
+<p>By default, if you install Minikube, all the certificates get installed in your
+<code>~/.minikube</code> folder. Your <code>kubectl</code> configuration under <code>~/.kube/config</code> also
+gets updated to use Minikube.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="manual-certificates-and-workers-setup"><a class="link" href="#manual-certificates-and-workers-setup">Manual Certificates and Workers Setup</a></h4>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+If you want to run the default demo setup, you can skip this section.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>To target a given Kubernetes instance, you need to pass around Certificate Authority
+key and also user keys.</p>
+</div>
+<div class="paragraph">
+<p>You can read more about the instructions on how to generate those keys <a href="https://coreos.com/kubernetes/docs/latest/openssl.html">here</a>.
+Generally speaking, if you have a Kubernetes installation (such as <code>minikube</code>), this step
+has already been done for you. Now you can reuse those keys on the workers.</p>
+</div>
+<div class="paragraph">
+<p>The following inormation has been extracted from the <a href="https://coreos.com/kubernetes/docs/latest/configure-kubectl.html">Kubernetes official documentation</a>.</p>
+</div>
+<div class="paragraph">
+<p>Configure <code>kubectl</code> to connect to the target cluster using the following commands, replacing the following values:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Replace <code>${MASTER_HOST}</code> with the master node address or name used in previous steps.</p>
+</li>
+<li>
+<p>Replace <code>${CA_CERT}</code> with the absolute path to the <code>ca.pem</code> created in previous steps.</p>
+</li>
+<li>
+<p>Replace <code>${ADMIN_KEY}</code> with the absolute path to the <code>admin-key.pem</code> created in previous steps.</p>
+</li>
+<li>
+<p>Replace <code>${ADMIN_CERT}</code> with the absolute path to the <code>admin.pem</code> created in previous steps.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>The following commands show how to perform these steps:</p>
+</div>
+<div class="exampleblock">
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">$ kubectl config set-cluster default-cluster --server=https://${MASTER_HOST} --certificate-authority=${CA_CERT}
+$ kubectl config set-credentials default-admin --certificate-authority=${CA_CERT} --client-key=${ADMIN_KEY} --client-certificate=${ADMIN_CERT}
+$ kubectl config set-context default-system --cluster=default-cluster --user=default-admin
+$ kubectl config use-context default-system</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="generate-minikube-namespaces"><a class="link" href="#generate-minikube-namespaces">Generate Minikube Namespaces</a></h3>
+<div class="paragraph">
+<p>With the Minikube cluster running, we need to generate namespaces. To do so, run the
+<code>./tools/k8s-helper.sh setup-namespaces</code>.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<link rel="stylesheet" href="js/highlight/styles/atom-one-dark-reasonable.min.css">
+<script src="js/highlight/highlight.min.js"></script>
+<script>hljs.initHighlighting()</script>
+</body>
+</html>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metadata>
+  <groupId>com.vizcentric</groupId>
+  <artifactId>flair-jenkins</artifactId>
+  <versioning>
+    <latest>1.0.0.BUILD-SNAPSHOT</latest>
+    <versions>
+      <version>1.0.0.BUILD-SNAPSHOT</version>
+    </versions>
+    <lastUpdated>20200428190405</lastUpdated>
+  </versioning>
+</metadata>
